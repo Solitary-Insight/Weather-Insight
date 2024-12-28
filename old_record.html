@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather Forecast App</title>
+  <style>
+    :root {
+      --primary-clr: #7984c7;
+      --background-color: #232D3F;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      min-width: 100px;
+      background: var(--primary-clr);
+      transition: background-image 0.3s ease;
+      background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5));
+      background-size: cover;
+      background-position: center;
+    }
+
+    .wrapper {
+      display: flex;
+      width: 100%;
+      min-width: 900px;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 25%;
+      min-width: 230px;
+      padding: 15px;
+      display: flex;
+      
+      flex-direction: column-reverse;
+      justify-content: space-between;
+      background-color: #526D82;
+      ;
+    }
+
+    .location {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .location-icon {
+      margin-right: 10px;
+      color: #666;
+    }
+
+    .location-text {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .options {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .units li {
+      padding: 10px 0;
+      text-align: center;
+      cursor: pointer;
+      border-bottom: 1px solid #ddd;
+      color: #333;
+      font-size: 16px;
+    }
+
+    .units li:hover {
+      background-color: #e0e0e0;
+    }
+
+    .main {
+      flex: 2;
+      margin: 10px;
+      padding: 20px;
+    }
+
+    .cards {
+      display: flex;
+      justify-content: space-between;
+      margin: 20px;
+      color: white;
+    }
+
+    .card2 {
+      flex: 1;
+      background-color: #100d36;
+      padding: 20px;
+      margin: 5px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      color: white;
+      border-radius: 8px;
+    }
+
+    .card-heading {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .content {
+      font-size: 16px;
+    }
+
+    .content p {
+      margin: auto;
+      width: max-content;
+    }
+
+    a {
+      text-decoration: none;
+      color: black;
+      background-color: #F97300;
+      padding: 3px 4px;
+      border-radius: 6px;
+      margin-bottom: 30px;
+    }
+  </style>
+  <script src="https://kit.fontawesome.com/64d58efce2.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <div class="wrapper">
+    <div class="sidebar">
+      <div class="location">
+        <div class="location-icon">
+          <i class="fas fa-map-marker-alt"></i>
+        </div>
+        <div class="location-text">
+          <p id="location">Location</p>
+        </div>
+      </div>
+      <ul class="options units" id="sidebar-list">
+        <!-- City and date list items will be dynamically added here -->
+      </ul>
+    </div>
+    <div class="main">
+      <nav>
+        <ul class="options units">
+          <a calss="record" href="./home.html">Go back</a>
+        </ul>
+      </nav>
+      <div class="cards" id="weather-card">
+        <!-- Weather data will be dynamically displayed here -->
+        <div class="temprature">
+          <h1 id="temp">0</h1>
+          <span class="temp-unit">°C</span>
+        </div>
+        <div class="date-time">
+          <p id="date-time"></p>
+        </div>
+        <div class="condition-rain">
+          <div class="condition">
+            <i class="fas fa-cloud"></i>
+            <div class="condition" id="condition">Condition</div>
+          </div>
+          <div class="rain">
+            <i class="fas fa-tint"></i>
+            <p id="rain">perc - 0%</p>
+          </div>
+        </div>
+      </div>
+      <div class="highlights">
+        <h2 style='color: white;font-weight: bold;' class="heading">Day's Highlights</h2>
+        <div class="cards">
+          <div class="card2">
+            <h4 class="card-heading">Wind Status</h4>
+            <div class="content">
+              <p class="wind-speed">0</p>
+              <p class="wind-status">Low</p>
+            </div>
+          </div>
+          <div class="card2">
+            <h4 class="card-heading">Air Quality</h4>
+            <div class="content">
+              <p class="air-quality">0</p>
+              <p class="air-quality-status">Low</p>
+            </div>
+          </div>
+          <div class="card2">
+            <h4 class="card-heading">Humidity</h4>
+            <div class="content">
+              <p class="humidity">0</p>
+              <p class="humidity-status">Low</p>
+            </div>
+          </div>
+          <!-- <div class="card2">
+            <h4 class="card-heading">Visibility</h4>
+            <div class="content">
+              <p class="visibility">0</p>
+              <p class="visibility-status">Low</p>
+            </div>
+          </div> -->
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const sidebarList = document.getElementById('sidebar-list');
+
+      // Function to fetch data from load_data.php
+      async function fetchData() {
+        try {
+          const response = await fetch('./load_data.php');
+          if (!response.ok) {
+            throw new Error('Failed to fetch data');
+          }
+          const data = await response.json();
+          return data;
+        } catch (error) {
+          console.error('Error fetching data:', error.message);
+          return [];
+        }
+      }
+      function formatDate(inputDate) {
+        // Parse the input date
+        const date = new Date(inputDate);
+
+        // Define arrays for month and day names
+        const monthNames = [
+          "January", "February", "March", "April", "May", "June",
+          "July", "August", "September", "October", "November", "December"
+        ];
+
+        // Extract day, month, and year from the date object
+        const day = date.getDate();
+        const month = monthNames[date.getMonth()];
+        const year = date.getFullYear();
+
+        // Format the date string
+        const formattedDate = `${day} ${month} ${year}`;
+
+        return formattedDate;
+        
+      }
+      // Function to populate sidebar with city names and dates
+      async function populateSidebar() {
+        const data = await fetchData();
+        sidebarList.innerHTML = ''; // Clear previous list items
+        data.forEach(item => {
+          const li = document.createElement('li');
+          li.style.color='black'
+          li.textContent = `${item.city} - ${formatDate(item.date)}`;
+          li.addEventListener('click', () => {
+            loadWeatherData(item.city, item.date);
+          });
+          sidebarList.appendChild(li);
+        });
+      }
+
+      // Function to load weather data for a specific city and date
+      async function loadWeatherData(city, date) {
+        try {
+          const response = await fetch('./get_weather.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ city, date })
+          });
+          if (!response.ok) {
+            throw new Error('Failed to load weather data');
+          }
+          const weatherData = await response.json();
+          displayWeatherData(weatherData);
+        } catch (error) {
+          console.error('Error loading weather data:', error.message);
+        }
+      }
+
+      // Function to display weather data in the main section
+      function displayWeatherData(weatherData) {
+        console.log(JSON.stringify(weatherData))
+        document.getElementById('temp').textContent = weatherData.temperature;
+        document.getElementById('date-time').textContent = formatDate(weatherData.date)
+        document.getElementById('condition').textContent = weatherData.condition;
+        document.getElementById('rain').textContent = `perc - ${weatherData.rain == undefined ? 0 : weatherData.rain}%`;
+        document.querySelector('.wind-speed').textContent = weatherData.wind_speed;
+        document.querySelector('.air-quality').textContent = weatherData.air_quality;
+        document.querySelector('.humidity').textContent = weatherData.humidity;
+        // document.querySelector('.visibility').textContent = weatherData.visibility;
+      }
+
+      // Initialize sidebar on page load
+      populateSidebar();
+    });
+
+  </script>
+</body>
+
+</html>
